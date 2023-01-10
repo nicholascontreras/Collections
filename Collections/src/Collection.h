@@ -18,9 +18,9 @@ private:
     unsigned int startingSyncKey;
 
 protected:
-    inline Collection() : startingSyncKey(0) {};
+    Collection() : startingSyncKey(0) {};
 
-    inline unsigned int getSyncKey() const { return startingSyncKey; };
-    inline void rotateSyncKey() { startingSyncKey++; };
-    inline bool checkSyncKey(unsigned int key) const { return key == startingSyncKey; };
+    unsigned int getSyncKey() const { return startingSyncKey; };
+    void rotateSyncKey() { startingSyncKey++; };
+    bool checkSyncKey(unsigned int key) const { return key == startingSyncKey; };
 };

@@ -181,6 +181,29 @@ TEST(ArrayListTests, TestCopy) {
 
     list1.set(44, 1);
     ASSERT_NE(list0, list1);
+
+    list0 = list1;
+    ASSERT_EQ(list0, list1);
+}
+
+TEST(ArrayListTests, TestMove) {
+    ArrayList<int> list0 = { 1, 2, 3 };
+    ArrayList<int> list1 = std::move(list0);
+
+    ASSERT_EQ(list0.getSize(), 0);
+    ASSERT_EQ(list1.getSize(), 3);
+    
+    list0.add(5);
+    ASSERT_EQ(list0.getSize(), 1);
+    ASSERT_EQ(list1.getSize(), 3);
+
+    list0 = std::move(list1);
+    ASSERT_EQ(list0.getSize(), 3);
+    ASSERT_EQ(list1.getSize(), 1);
+
+    list1.add(15);
+    ASSERT_EQ(list0, ArrayList<int>({ 1, 2, 3 }));
+    ASSERT_EQ(list1, ArrayList<int>({ 5, 15 }));
 }
 
 TEST(ArrayListTests, TestConstList) {
