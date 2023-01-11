@@ -21,14 +21,14 @@
     <ClInclude Include="src\errors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Iterator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\ArrayList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
+    <ClInclude Include="src\HashMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

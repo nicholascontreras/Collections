@@ -1,12 +1,18 @@
 #pragma once
 
+#include <functional>
+
 #include "errors.h"
 
-#include "Iterator.h"
+//#include "Iterator.h"
+
+template <class>
+class Iterator;
 
 template <class T>
 class Collection {
 public:
+
     virtual Iterator<T&> begin() = 0;
     virtual Iterator<T&> end() = 0;
 
@@ -15,12 +21,12 @@ public:
 
     virtual int getSize() const = 0;
 private:
-    unsigned int startingSyncKey;
+    unsigned int syncKey;
 
 protected:
-    Collection() : startingSyncKey(0) {};
+    Collection() : syncKey(0) {};
 
-    unsigned int getSyncKey() const { return startingSyncKey; };
-    void rotateSyncKey() { startingSyncKey++; };
-    bool checkSyncKey(unsigned int key) const { return key == startingSyncKey; };
+    unsigned int getSyncKey() const { return syncKey; };
+    void rotateSyncKey() { syncKey++; };
+    bool checkSyncKey(unsigned int key) const { return key == syncKey; };
 };

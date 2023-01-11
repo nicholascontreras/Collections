@@ -30,6 +30,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="src\tests\ArrayList_tests.cpp" />
+    <ClCompile Include="src\tests\HashMap_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch\pch.h" />

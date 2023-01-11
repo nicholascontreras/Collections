@@ -1,15 +1,13 @@
 #pragma once
 
-#include <memory>
+#include "Collection.h"
 
 template <class T>
 class Iterator {
 public:
     class IteratorImpl {
     public:
-        const void* collection;
-
-        IteratorImpl(const void* collection) : collection(collection) {};
+        IteratorImpl() {};
 
         IteratorImpl(const IteratorImpl& other) = delete;
         IteratorImpl& operator=(const IteratorImpl& other) noexcept = delete;
@@ -20,10 +18,14 @@ public:
 
         virtual T get() = 0;
         virtual void next() = 0;
-        virtual bool atEnd() = 0;
+        virtual bool samePosition(const IteratorImpl& other) = 0;
     };
 
-    Iterator(IteratorImpl* impl) : impl(impl) {};
+    Iterator(const Collection& collection, IteratorImpl* impl) :
+        collection(collection),
+        syncKey(collection.getSyncKey()),
+        impl(impl) {
+    };
 
     Iterator(const Iterator& other) = delete;
     Iterator& operator=(const Iterator& other) noexcept = delete;
@@ -34,20 +36,41 @@ public:
         delete impl;
     }
 
-    T operator*() { return impl->get(); };
-    void operator++() { impl->next(); };
+    T operator*() {
+        if(collection.checkSyncKey(syncKey)) {
+            return impl->get();
+        } else {
+            throw ConcurrentModificationException("Detected modification of underlying Collection during Iterator get!");
+        }
+    };
+    void operator++() {
+        if(collection.checkSyncKey(syncKey)) {
+            impl->next();
+        } else {
+            throw ConcurrentModificationException("Detected modification of underlying Collection during Iterator next!");
+        }
+    };
 
     bool operator!=(const Iterator& other) {
-        if(impl->collection != other.impl->collection) {
-            throw UnrelatedIteratorException("The given Iterator does not iterate on the same Collection!");
-        }
-
-        if(!impl->atEnd() && !other.impl->atEnd()) {
-            return impl->get() != other.impl->get();
+        if(&collection == &other.collection) {
+            return !impl->samePosition(*other.impl);
         } else {
-            return !(impl->atEnd() && other.impl->atEnd());
+            throw UnrelatedIteratorException("The given Iterator does not iterate on the same Collection!");
         }
     }
 private:
+
+    struct CollectionAccess {
+        CollectionAccess(void* collectionPtr, std::function<unsigned int()> syncKeyFunc) :
+            collectionPtr(collectionPtr),
+            syncKeyFunc(syncKeyFunc) {};
+
+        void* collectionPtr;
+        std::function<unsigned int()> syncKeyFunc;
+    };
+
+    const CollectionAccess collectionAccess;
+    const unsigned int syncKey;
+
     IteratorImpl* impl;
 };

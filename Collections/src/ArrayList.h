@@ -4,6 +4,7 @@
 #include <functional>
 
 #include "Collection.h"
+#include "Iterator.h"
 
 template <class T>
 class ArrayList : public Collection<T> {
@@ -24,6 +25,9 @@ public:
         }
     }
     ArrayList& operator=(const ArrayList& other) {
+        // Manually avoid the obvious optimization of taking the rhs by value
+        // This ensures r-value assignment is not ambiguous between this operator and move-assignment
+        // Allows testing all of the copy and move operations explicitly
         ArrayList temp(other);
         swap(*this, temp);
         return *this;
@@ -122,60 +126,41 @@ public:
     template <class U>
     class VectorIterator : public Iterator<U>::IteratorImpl {
     public:
-        VectorIterator(const Collection<T>& collection, int index, std::function<U(int)> valueFunc, std::function<unsigned int()> syncKeyFunc) :
-            IteratorImpl(&collection),
-            collection(collection),
+        VectorIterator(int index, std::function<U(int)> valueFunc) :
             index(index), 
-            valueFunc(valueFunc), 
-            syncKeyFunc(syncKeyFunc),
-            startingSyncKey(syncKeyFunc()) {};
+            valueFunc(valueFunc) {};
 
-        virtual U get() {
-            if(syncKeyFunc() == startingSyncKey) {
-                return valueFunc(index);
-            } else {
-                throw ConcurrentModificationException("Detected modification of underlying ArrayList during Iterator get!");
-            }
+        U get() override {
+            return valueFunc(index);
         }
-        virtual void next() {
-            if(syncKeyFunc() == startingSyncKey) {
-                index++;
-            } else {
-                throw ConcurrentModificationException("Detected modification of underlying ArrayList during Iterator next!");
-            }
+        void next() override {
+            index++;
         }
-        virtual bool atEnd() {
-            return index == collection.getSize();
+        bool samePosition(const Iterator<U>::IteratorImpl& other) override {
+            return index == other.index;
         }
     private:
-        const Collection<T>& collection;
         int index;
         std::function<U(int)> valueFunc;
-        std::function<unsigned int()> syncKeyFunc;
-        unsigned int startingSyncKey;
     };
 
-    virtual Iterator<T&> begin() {
-        return Iterator<T&>(new VectorIterator<T&>(*this, 0, 
-            [&](int index)->T& { return get(index); }, 
-            std::bind(&ArrayList::getSyncKey, this)));
+    Iterator<T&> begin() override {
+        return Iterator<T&>(*this, new VectorIterator<T&>(0, 
+            [&](int index)->T& { return get(index); }));
     }
 
-    virtual Iterator<T&> end() {
-        return Iterator<T&>(new VectorIterator<T&>(*this, size,
-            [&](int index)->T& { return get(index); },
-            std::bind(&ArrayList::getSyncKey, this)));
+    Iterator<T&> end() override {
+        return Iterator<T&>(*this, new VectorIterator<T&>(size,
+            [&](int index)->T& { return get(index); }));
     }
 
-    virtual Iterator<const T&> begin() const {
-        return Iterator<const T&>(new VectorIterator<const T&>(*this, 0,
-            [&](int index)->const T& { return get(index); },
-            std::bind(&ArrayList::getSyncKey, this)));
+    Iterator<const T&> begin() const override {
+        return Iterator<const T&>(*this, new VectorIterator<const T&>(0,
+            [&](int index)->const T& { return get(index); }));
     }
-    virtual Iterator<const T&> end() const {
-        return Iterator<const T&>(new VectorIterator<const T&>(*this, size,
-            [&](int index)->const T& { return get(index); },
-            std::bind(&ArrayList::getSyncKey, this)));
+    Iterator<const T&> end() const override {
+        return Iterator<const T&>(*this, new VectorIterator<const T&>(size,
+            [&](int index)->const T& { return get(index); }));
     }
 private:
     int size;
