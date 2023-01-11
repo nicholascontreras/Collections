@@ -13,7 +13,7 @@ struct KeyValuePair {
 };
 
 template<class T, class U>
-class HashMap : public Collection<KeyValuePair<T, U>> {
+class HashMap : public TemplatedCollection<KeyValuePair<T, U>> {
 public:
     HashMap() : loadFactor(0.75) {}
 

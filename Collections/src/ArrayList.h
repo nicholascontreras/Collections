@@ -7,7 +7,7 @@
 #include "Iterator.h"
 
 template <class T>
-class ArrayList : public Collection<T> {
+class ArrayList : public TemplatedCollection<T> {
 public:
     ArrayList() : size(0), backingArrayLength(32) {
         backingArray = new T[backingArrayLength];
@@ -136,7 +136,10 @@ public:
         void next() override {
             index++;
         }
-        bool samePosition(const Iterator<U>::IteratorImpl& other) override {
+        bool samePosition(const Iterator<U>::IteratorImpl& other) const override {
+            return other.samePosition(*this);
+        }
+        bool samePosition(const VectorIterator& other) const {
             return index == other.index;
         }
     private:

@@ -18,7 +18,7 @@ public:
 
         virtual T get() = 0;
         virtual void next() = 0;
-        virtual bool samePosition(const IteratorImpl& other) = 0;
+        virtual bool samePosition(const IteratorImpl& other) const = 0;
     };
 
     Iterator(const Collection& collection, IteratorImpl* impl) :
@@ -60,16 +60,7 @@ public:
     }
 private:
 
-    struct CollectionAccess {
-        CollectionAccess(void* collectionPtr, std::function<unsigned int()> syncKeyFunc) :
-            collectionPtr(collectionPtr),
-            syncKeyFunc(syncKeyFunc) {};
-
-        void* collectionPtr;
-        std::function<unsigned int()> syncKeyFunc;
-    };
-
-    const CollectionAccess collectionAccess;
+    const Collection& collection;
     const unsigned int syncKey;
 
     IteratorImpl* impl;
