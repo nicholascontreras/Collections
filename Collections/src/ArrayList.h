@@ -9,7 +9,7 @@
 template <class T>
 class ArrayList : public TemplatedCollection<T> {
 public:
-    ArrayList() : size(0), backingArrayLength(32) {
+    ArrayList() : size(0), backingArrayLength(16) {
         backingArray = new T[backingArrayLength];
     }
 
@@ -123,46 +123,44 @@ public:
         swap(lhs.backingArrayLength, rhs.backingArrayLength);
     }
 
-    template <class U>
-    class VectorIterator : public Iterator<U>::IteratorImpl {
+    template <class V>
+    class ArrayListIterator : public Iterator<V>::IteratorImpl {
     public:
-        VectorIterator(int index, std::function<U(int)> valueFunc) :
+        ArrayListIterator(int index, std::function<V(int)> valueFunc) :
             index(index), 
             valueFunc(valueFunc) {};
 
-        U get() override {
+        V get() override {
             return valueFunc(index);
         }
         void next() override {
             index++;
         }
-        bool samePosition(const Iterator<U>::IteratorImpl& other) const override {
-            return other.samePosition(*this);
-        }
-        bool samePosition(const VectorIterator& other) const {
-            return index == other.index;
+        bool samePosition(typename const Iterator<V>::IteratorImpl& o) const override {
+            const ArrayListIterator& other = dynamic_cast<const ArrayListIterator&>(o);
+            return  index == other.index;
         }
     private:
         int index;
-        std::function<U(int)> valueFunc;
+        std::function<V(int)> valueFunc;
     };
 
     Iterator<T&> begin() override {
-        return Iterator<T&>(*this, new VectorIterator<T&>(0, 
+        return Iterator<T&>(*this, new ArrayListIterator<T&>(0, 
             [&](int index)->T& { return get(index); }));
     }
 
     Iterator<T&> end() override {
-        return Iterator<T&>(*this, new VectorIterator<T&>(size,
+        return Iterator<T&>(*this, new ArrayListIterator<T&>(size,
             [&](int index)->T& { return get(index); }));
     }
 
     Iterator<const T&> begin() const override {
-        return Iterator<const T&>(*this, new VectorIterator<const T&>(0,
+        return Iterator<const T&>(*this, new ArrayListIterator<const T&>(0,
             [&](int index)->const T& { return get(index); }));
     }
     Iterator<const T&> end() const override {
-        return Iterator<const T&>(*this, new VectorIterator<const T&>(size,
+        return Iterator<const T&>(*this, new ArrayListIterator<const T&>(size,
             [&](int index)->const T& { return get(index); }));
     }
 private:

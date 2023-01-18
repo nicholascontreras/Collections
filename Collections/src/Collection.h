@@ -8,12 +8,12 @@ class Collection {
 public:
     virtual int getSize() const = 0;
 
-protected:
-    Collection() : syncKey(0) {};
-
     unsigned int getSyncKey() const { return syncKey; };
     void rotateSyncKey() { syncKey++; };
     bool checkSyncKey(unsigned int key) const { return key == syncKey; };
+
+protected:
+    Collection() : syncKey(0) {};
 
 private:
     unsigned int syncKey;

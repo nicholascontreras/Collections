@@ -13,6 +13,7 @@ private: \
 };
 
 DEFINE_EXCEPTION(IndexOutOfBoundsException)
+DEFINE_EXCEPTION(NoSuchItemException)
 DEFINE_EXCEPTION(ConcurrentModificationException)
 DEFINE_EXCEPTION(UnrelatedIteratorException)
 

@@ -59,7 +59,6 @@ public:
         }
     }
 private:
-
     const Collection& collection;
     const unsigned int syncKey;
 
