@@ -1,14 +1,7 @@
 #pragma once
 
-class EmptyClass {
-};
+#include "pch.h"
 
-class SimpleClass {
-public:
-    inline SimpleClass(int field) : field(field) {};
-
-    inline int setField(int newValue) { field = newValue; };
-    inline int getField() const { return field; };
-private:
-    int field;
+struct ClassWithFunction {
+    MOCK_METHOD(void, testFunction, ());
 };

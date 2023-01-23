@@ -7,7 +7,7 @@
 class NAME : public std::exception { \
 public: \
     inline NAME(std::string message) : message(message) {}; \
-    inline virtual const char* what() { return message.c_str(); } \
+    inline const char* what() const override { return message.c_str(); } \
 private: \
     std::string message; \
 };

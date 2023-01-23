@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "../util.h"
+#include "mock_data.h"
 
 #include "ArrayList.h"
 
@@ -218,4 +219,15 @@ TEST(ArrayListTests, TestConstList) {
 
     const int& x = list0.get(1);
     ASSERT_EQ(x, 2);
+}
+
+TEST(ArrayListTests, TestCallFunction) {
+    ArrayList<ClassWithFunction> list0;
+    list0.add(ClassWithFunction());
+
+    EXPECT_CALL(list0.get(0), testFunction()).Times(1);
+
+    for(ClassWithFunction& cur : list0) {
+        cur.testFunction();
+    }
 }

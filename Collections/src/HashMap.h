@@ -4,7 +4,6 @@
 
 template<class A, class B>
 struct KeyValuePair { 
-
     KeyValuePair() : key(A()), value(B()) {};
     KeyValuePair(A key, B value) : key(key), value(value) {};
 
@@ -25,7 +24,7 @@ public:
         }
     }
 
-    bool containsKey(T key) {
+    bool containsKey(T key) const {
         int bucket = hashKey(key);
         return keyPositionInBucket(key, bucket) != -1;
     }
@@ -33,7 +32,7 @@ public:
     void put(T key, U value) {
         this->rotateSyncKey();
 
-        if(numEntries + 1 >= buckets.getSize() * loadFactor) {
+        if(numEntries + 1 >= (int)(buckets.getSize() * loadFactor)) {
             expandAndRehash();
         }
 
@@ -46,13 +45,25 @@ public:
         }
     }
 
-    U get(T key) {
+    U get(T key) const {
         if(!containsKey(key)) {
             throw NoSuchItemException("The given key does not map to any entry!");
         } else {
             int bucket = hashKey(key);
             return buckets.get(bucket).get(keyPositionInBucket(key, bucket)).value;
         }
+    }
+
+    bool operator==(const HashMap& other) const {
+        if(getSize() != other.getSize()) {
+            return false;
+        }
+        for(const KeyValuePair<T, U>& curPair : other) {
+            if(!containsKey(curPair.key) || get(curPair.key) != curPair.value) {
+                return false;
+            }
+        }
+        return true;
     }
 
     Iterator<KeyValuePair<T, U>&> begin() override {
@@ -92,14 +103,24 @@ private:
             curBucket(bucket),
             curIndexInBucket(0),
             valueFunc(valueFunc),
-            hashMap(hashMap) {};
+            hashMap(hashMap) {
+
+            // Iterate forward until we reach a bucket with at least one item
+            while(curBucket < hashMap.buckets.getSize() && hashMap.buckets.get(curBucket).getSize() == 0) {
+                curBucket++;
+            }
+        };
 
         V get() override {
             return valueFunc(curBucket, curIndexInBucket);
         }
         void next() override {
             curIndexInBucket++;
-            if(curIndexInBucket == hashMap.buckets.get(curBucket).getSize()) {
+
+            // If end of current bucket, proceed to next bucket with any items (or end of all buckets)
+            while(curBucket < hashMap.buckets.getSize() && 
+                curIndexInBucket == hashMap.buckets.get(curBucket).getSize()) {
+
                 curIndexInBucket = 0;
                 curBucket++;
             }
@@ -122,11 +143,11 @@ private:
     std::function<int(const T)> hashFunction;
     double loadFactor;
 
-    int hashKey(T key) {
+    int hashKey(T key) const {
         return ((hashFunction(key) % buckets.getSize()) + buckets.getSize()) % buckets.getSize();
     }
 
-    int keyPositionInBucket(T key, int bucketIndex) {
+    int keyPositionInBucket(T key, int bucketIndex) const {
         for(int i = 0; i < buckets.get(bucketIndex).getSize(); i++) {
             if(buckets.get(bucketIndex).get(i).key == key) {
                 return i;

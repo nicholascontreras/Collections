@@ -44,7 +44,7 @@ public:
         delete[] backingArray;
     }
 
-    void add(T item) {
+    void add(const T& item) {
         this->rotateSyncKey();
         if(size == backingArrayLength) {
             expandBackingArray();
